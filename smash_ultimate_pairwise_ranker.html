@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smash Ultimate Pairwise Ranker</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#60a5fa;--glass:rgba(255,255,255,0.03)}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#041026 0%, #071428 50%);color:#e6eef8;padding:20px}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:20px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6);}
+    .pair{display:flex;gap:12px;align-items:stretch}
+    .fighter{flex:1;padding:18px;border-radius:10px;background:var(--glass);cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;border:1px solid rgba(255,255,255,0.03);transition:transform .08s ease,box-shadow .08s}
+    .fighter:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+    .fighter .name{font-weight:600;font-size:16px}
+    .fighter .meta{color:var(--muted);font-size:13px;margin-top:8px}
+    .controls{display:flex;gap:8px;margin-top:12px}
+    button{background:var(--accent);color:#01223a;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .ranklist{margin-top:14px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:6px 8px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.02)}
+    th{color:var(--muted);font-size:13px}
+    td.namecell{font-weight:600}
+    .small{font-size:13px;color:var(--muted)}
+    .topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+    .export{background:linear-gradient(90deg,#86efac,#60a5fa);color:#05201a}
+    footer{color:var(--muted);text-align:center;margin-top:18px}
+    @media(max-width:700px){.pair{flex-direction:column}.fighter{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Smash Ultimate — Pairwise Ranker (Text-only)</h1>
+        <p class="lead">Click which fighter you prefer in each head-to-head. Rankings are derived with a live Elo system. Use "I'm done" to compute the current ranking and export JSON for GitHub.</p>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="topbar">
+        <div class="small">Fighters: <strong id="count">86</strong> • Possible unique matchups: <strong id="totalPairs">3655</strong></div>
+        <div class="small">Matches recorded: <strong id="matchesRecorded">0</strong></div>
+      </div>
+
+      <div id="pairArea">
+        <div class="pair">
+          <div id="left" class="fighter" onclick="choose('left')">
+            <div class="name" id="leftName">Loading...</div>
+            <div class="meta" id="leftMeta">Elo: — • Wins: 0 • Losses: 0</div>
+          </div>
+
+          <div id="right" class="fighter" onclick="choose('right')">
+            <div class="name" id="rightName">Loading...</div>
+            <div class="meta" id="rightMeta">Elo: — • Wins: 0 • Losses: 0</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button onclick="skipPair()" class="secondary">Skip</button>
+          <button onclick="generatePair()" class="secondary">New Pair</button>
+          <button onclick="finish()">I'm done</button>
+          <button onclick="resetAll()" class="secondary">Reset</button>
+          <button onclick="exportJSON()" class="export">Export JSON</button>
+        </div>
+      </div>
+
+      <div class="ranklist card" style="margin-top:14px;">
+        <h3 style="margin-top:0">Live rankings (top 20)</h3>
+        <div style="max-height:360px;overflow:auto;padding-right:8px">
+          <table id="rankTable">
+            <thead><tr><th>#</th><th>Name</th><th>Elo</th><th class="small">W</th><th class="small">L</th></th></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <footer>
+      Built instantly by ChatGPT for your GitHub. Save the file as <code>smash-ultimate-pairwise-ranker.html</code> and open in the browser. All data persists in localStorage.
+    </footer>
+  </div>
+
+<script>
+// --- Fighter list (text-only) ---
+const FIGHTERS = [
+"Banjo & Kazooie","Bayonetta","Bowser","Bowser Jr.","Byleth","Captain Falcon","Chrom","Cloud","Corrin","Daisy","Dark Pit","Dark Samus","Diddy Kong","Donkey Kong","Dr. Mario","Duck Hunt","Falco","Fox","Ganondorf","Greninja","Hero","Ice Climbers","Ike","Incineroar","Inkling","Isabelle","Jigglypuff","Joker","Kazuya","Ken","King Dedede","King K. Rool","Kirby","Link","Little Mac","Lucario","Lucas","Lucina","Luigi","Mario","Marth","Mega Man","Meta Knight","Mewtwo","Mii Brawler","Mii Gunner","Mii Swordfighter","Min Min","Mr. Game & Watch","Ness","Olimar","PAC-MAN","Palutena","Peach","Pichu","Pikachu","Piranha Plant","Pit","Pokemon Trainer","Pyra/Mythra","R.O.B.","Richter","Ridley","Robin","Rosalina & Luma","Roy","Ryu","Samus","Sephiroth","Sheik","Shulk","Simon","Snake","Sonic","Sora","Steve","Terry","Toon Link","Villager","Wario","Wii Fit Trainer","Wolf","Yoshi","Young Link","Zelda","Zero Suit Samus"
+];
+
+const TOTAL_PAIRS = (FIGHTERS.length * (FIGHTERS.length - 1)) / 2;
+document.getElementById('count').innerText = FIGHTERS.length;
+document.getElementById('totalPairs').innerText = TOTAL_PAIRS;
+
+// --- Persistent state ---
+const STORAGE_KEY = 'smash_pairwise_state_v1';
+let state = loadState() || createInitialState();
+
+function createInitialState(){
+  const fighters = FIGHTERS.map(name => ({name, elo:1500, wins:0, losses:0, played:0}));
+  return {fighters, matches: []};
+}
+
+function loadState(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null }catch(e){return null}
+}
+
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); updateUI(); }
+
+// --- Elo logic ---
+function expectedScore(ra, rb){ return 1/(1+Math.pow(10,(rb-ra)/400)); }
+function updateElo(a, b, scoreA, K=32){
+  const ea = expectedScore(a.elo,b.elo);
+  const eb = 1-ea;
+  a.elo = Math.round(a.elo + K*(scoreA - ea));
+  b.elo = Math.round(b.elo + K*((1-scoreA) - eb));
+}
+
+// --- Pair generation: Swiss-ish: sort by Elo and pick adjacent random index ---
+let currentPair = null;
+function generatePair(){
+  const fighters = state.fighters.slice().sort((x,y)=>y.elo-x.elo);
+  if(fighters.length < 2) return;
+  const idx = Math.floor(Math.random() * (fighters.length-1));
+  const left = fighters[idx];
+  const right = fighters[idx+1];
+  currentPair = {leftName:left.name, rightName:right.name};
+  renderPair(left, right);
+}
+
+function renderPair(left, right){
+  document.getElementById('leftName').innerText = left.name;
+  document.getElementById('rightName').innerText = right.name;
+  document.getElementById('leftMeta').innerText = `Elo: ${left.elo} • Wins: ${left.wins} • Losses: ${left.losses}`;
+  document.getElementById('rightMeta').innerText = `Elo: ${right.elo} • Wins: ${right.wins} • Losses: ${right.losses}`;
+}
+
+function choose(side){
+  if(!currentPair){ generatePair(); return; }
+  const winnerName = side === 'left' ? currentPair.leftName : currentPair.rightName;
+  const loserName = side === 'left' ? currentPair.rightName : currentPair.leftName;
+
+  const a = state.fighters.find(f=>f.name===winnerName);
+  const b = state.fighters.find(f=>f.name===loserName);
+  if(!a || !b) return;
+
+  // record match
+  state.matches.push({winner:winnerName, loser:loserName, time:Date.now(), aEloBefore:a.elo, bEloBefore:b.elo});
+
+  // update wins/losses and elo
+  updateElo(a,b,1);
+  a.wins++; b.losses++; a.played++; b.played++;
+
+  document.getElementById('matchesRecorded').innerText = state.matches.length;
+  saveState();
+  generatePair();
+}
+
+function skipPair(){ generatePair(); }
+
+function finish(){
+  // show full ranking in a modal area: we'll render the full sorted table
+  renderRanking(true);
+}
+
+function renderRanking(showAll=false){
+  const tbody = document.querySelector('#rankTable tbody');
+  tbody.innerHTML = '';
+  const sorted = state.fighters.slice().sort((a,b)=>b.elo - a.elo);
+  const list = showAll ? sorted : sorted.slice(0,20);
+  list.forEach((f,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td class="namecell">${f.name}</td><td>${f.elo}</td><td class="small">${f.wins}</td><td class="small">${f.losses}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function resetAll(){ if(!confirm('Reset all stored data? This cannot be undone.')) return; localStorage.removeItem(STORAGE_KEY); state = createInitialState(); saveState(); }
+
+function exportJSON(){
+  const payload = {fighters: state.fighters.slice().sort((a,b)=>b.elo-a.elo), matches: state.matches, created: new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'smash_rankings_export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+// live UI updates
+function updateUI(){
+  document.getElementById('matchesRecorded').innerText = state.matches.length;
+  renderRanking(false);
+}
+
+// initialize
+if(!loadState()) saveState();
+updateUI();
+generatePair();
+
+</script>
+</body>
+</html>
