@@ -161,7 +161,7 @@ function renderRanking(showAll=false){
   const tbody = document.querySelector('#rankTable tbody');
   tbody.innerHTML = '';
   const sorted = state.fighters.slice().sort((a,b)=>b.elo - a.elo);
-  const list = showAll ? sorted : sorted.slice(0,20);
+  const list = showAll ? sorted : sorted.slice(0,86);
   list.forEach((f,i)=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${i+1}</td><td class="namecell">${f.name}</td><td>${f.elo}</td><td class="small">${f.wins}</td><td class="small">${f.losses}</td>`;
