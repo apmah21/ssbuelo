@@ -169,10 +169,10 @@ const FIGHTERS = [
   // ... add the rest here following this pattern
 ];
 
-// --- Fill with placeholders for all fighters if not complete ---
-while (FIGHTERS.length < 86) {
-  FIGHTERS.push({ name: `Fighter ${FIGHTERS.length+1}`, image: `https://placehold.co/120x120?text=${FIGHTERS.length+1}` });
-}
+// // --- Fill with placeholders for all fighters if not complete ---
+// while (FIGHTERS.length < 86) {
+//   FIGHTERS.push({ name: `Fighter ${FIGHTERS.length+1}`, image: `https://placehold.co/120x120?text=${FIGHTERS.length+1}` });
+// }
 
 const TOTAL_PAIRS = (FIGHTERS.length * (FIGHTERS.length - 1)) / 2;
 document.getElementById('count').innerText = FIGHTERS.length;
