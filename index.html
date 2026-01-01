@@ -5,10 +5,71 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Smash Ultimate Pairwise Ranker</title>
   <style>
-    body {
+    html, body {
     background: black;
     color: white;
+    font-family: "Times New Roman", Times, serif;
+    margin: 0;
+    padding: 20px;
   }
+
+  h1, h2, h3 {
+    font-weight: normal;
+  }
+
+  button {
+    background: black;
+    color: white;
+    border: 1px solid white;
+    padding: 6px 10px;
+    margin-right: 6px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: white;
+    color: black;
+  }
+
+  .pair {
+    display: flex;
+    gap: 40px;
+    margin: 20px 0;
+  }
+
+  .fighter {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  img.portrait {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  th, td {
+    border-bottom: 1px solid white;
+    padding: 4px 6px;
+    text-align: left;
+  }
+
+  th {
+    font-weight: normal;
+  }
+    /* body {
+    background: black;
+    color: white;
+  } */
     /* :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#60a5fa;--glass:rgba(255,255,255,0.03)}
     html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
     body{background:linear-gradient(180deg,#041026 0%, #071428 50%);color:#e6eef8;padding:20px}
