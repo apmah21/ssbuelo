@@ -97,6 +97,16 @@
     .export{background:linear-gradient(90deg,#86efac,#60a5fa);color:#05201a}
     footer{color:var(--muted);text-align:center;margin-top:18px}
     @media(max-width:700px){.pair{flex-direction:column}.fighter{padding:12px}} */
+
+    .controls {
+      margin: 10px 0;
+    }
+
+    .controls button {
+      width: 100%;
+      max-width: 400px;
+    }
+    
   </style>
 </head>
 <body>
@@ -110,7 +120,7 @@
 
     <div class="card">
       <div class="topbar">
-        <div class="small">Fighters: <strong id="count">82</strong> • Possible unique matchups: <strong id="totalPairs">3655</strong></div>
+        <div class="small">Fighters: <strong id="count">82</strong> • Possible unique matchups: <strong id="totalPairs">-</strong></div>
         <div class="small">Matches recorded: <strong id="matchesRecorded">0</strong></div>
       </div>
 
@@ -122,10 +132,12 @@
 
         <div class="controls">
           <button onclick="skipPair()" class="secondary">Skip</button>
+        </div>
           <!-- <button onclick="generatePair()" class="secondary">New Pair</button> -->
-          <button onclick="finish()">I'm done</button>
+          <!-- <button onclick="finish()">I'm done</button> -->
+        <div>
           <button onclick="resetAll()" class="secondary">Reset</button>
-          <button onclick="exportJSON()" class="export">Export JSON</button>
+          <!-- <button onclick="exportJSON()" class="export">Export JSON</button> -->
         </div>
       </div>
 
